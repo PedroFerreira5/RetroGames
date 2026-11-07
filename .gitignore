@@ -1,0 +1,16 @@
+# Arquivos gerados pelo .NET
+bin/
+obj/
+
+# Arquivos gerados pelo front-end
+node_modules/
+dist/
+
+# Credenciais locais
+.env
+.env.*
+!.env.example
+
+# Configurações locais dos editores
+.vs/
+.idea/
