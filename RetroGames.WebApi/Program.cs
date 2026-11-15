@@ -1,4 +1,6 @@
+using Microsoft.OpenApi;
 using RetroGames.WebApi.Configuration;
+using RetroGames.WebApi.Middlewares;
 
 DotNetEnv.Env.TraversePath().Load();
 
@@ -14,9 +16,38 @@ if (string.IsNullOrWhiteSpace(stringConexao))
 builder.Services.AddRepositorios(stringConexao);
 builder.Services.AddServicosDeNegocio();
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(opcoes =>
+{
+    opcoes.AddOperationTransformer((operacao, contexto, _) =>
+    {
+        var temIdInteiro = contexto.Description.ParameterDescriptions.Any(
+            parametro => parametro.Name == "id" && parametro.Type == typeof(int));
+
+        if (temIdInteiro && operacao.Parameters is not null)
+        {
+            foreach (var parametro in operacao.Parameters.OfType<OpenApiParameter>())
+            {
+                if (parametro.In == ParameterLocation.Path && parametro.Name == "id")
+                {
+                    // O Swagger precisa de um único tipo para o campo da rota.
+                    parametro.Schema = new OpenApiSchema
+                    {
+                        Type = JsonSchemaType.Integer,
+                        Format = "int32"
+                    };
+                }
+            }
+        }
+
+        return Task.CompletedTask;
+    });
+});
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
