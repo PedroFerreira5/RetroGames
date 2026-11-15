@@ -73,7 +73,7 @@ public class JogoRepository : RepositoryBase, IJogoRepository
             LIMIT @limite OFFSET @deslocamento;
             """;
 
-        var deslocamento = checked((pagina - 1) * tamanhoPagina);
+        var deslocamento = ((long)pagina - 1) * tamanhoPagina;
 
         await using var conexao = await AbrirConexaoAsync();
 
