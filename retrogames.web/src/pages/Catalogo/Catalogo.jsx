@@ -145,7 +145,7 @@ export default function Catalogo() {
           ) : (
             <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
               {consulta.dados.itens.map(jogo => (
-                <div className="col" key={jogo.id}><CardJogo jogo={jogo} /></div>
+                <div className="col" key={jogo.id}><CardJogo jogo={jogo} buscaCatalogo={parametros.toString()} /></div>
               ))}
             </div>
           )}

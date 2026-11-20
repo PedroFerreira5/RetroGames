@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { formatarPreco } from '../lib/formato.js'
 
-export default function CardJogo({ jogo }) {
+export default function CardJogo({ jogo, buscaCatalogo }) {
   return (
     <article className="card h-100 border-0 border-top border-primary border-3 shadow-sm">
       <div className="card-body d-flex flex-column gap-3">
@@ -27,6 +27,7 @@ export default function CardJogo({ jogo }) {
         <Link
           className="btn btn-outline-primary align-self-start"
           to={`/jogos/${jogo.id}`}
+          state={{ buscaCatalogo }}
           aria-label={`Ver detalhes de ${jogo.nome}`}
         >
           Ver detalhes
