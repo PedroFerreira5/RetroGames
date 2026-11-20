@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.OpenApi;
+using RetroGames.Services;
 using RetroGames.WebApi.ActionFilters;
 using RetroGames.WebApi.Configuration;
 using RetroGames.WebApi.Middlewares;
@@ -52,6 +53,14 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
+
+await using (var escopo = app.Services.CreateAsyncScope())
+{
+    var autenticacao = escopo.ServiceProvider.GetRequiredService<IAutenticacaoService>();
+    await autenticacao.GarantirAdministradorInicialAsync(
+        app.Configuration["AdminInicial:Email"],
+        app.Configuration["AdminInicial:Senha"]);
+}
 
 app.UseExceptionHandler();
 
