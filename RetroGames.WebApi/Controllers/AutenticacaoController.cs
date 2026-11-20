@@ -51,7 +51,7 @@ public sealed class AutenticacaoController(IAutenticacaoService servico, IAntifo
     }
 
     [HttpPost("logout")]
-    [Authorize]
+    [Authorize(Policy = Politicas.Administrador)]
     public async Task<ActionResult<RetroGamesResponseApiModel>> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -61,7 +61,7 @@ public sealed class AutenticacaoController(IAutenticacaoService servico, IAntifo
     }
 
     [HttpGet("eu")]
-    [Authorize]
+    [Authorize(Policy = Politicas.Administrador)]
     public ActionResult<RetroGamesResponseApiModel<UsuarioLogadoResponseApiModel>> Eu()
     {
         return Ok(RespostaUsuario(User));

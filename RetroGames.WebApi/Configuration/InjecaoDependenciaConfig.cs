@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using RetroGames.Model.Model;
 using RetroGames.Repository;
 using RetroGames.Services;
+using RetroGames.WebApi.Services;
 
 namespace RetroGames.WebApi.Configuration;
 
@@ -24,6 +25,8 @@ public static class InjecaoDependenciaConfig
     public static IServiceCollection AddServicosDeNegocio(this IServiceCollection servicos)
     {
         servicos.AddScoped<IPlataformaService, PlataformaService>();
+        servicos.AddHttpContextAccessor();
+        servicos.AddScoped<IUsuarioAtualService, UsuarioAtualService>();
         servicos.AddScoped<IJogoService, JogoService>();
         servicos.AddScoped<IGeneroService, GeneroService>();
         servicos.AddScoped<ICondicaoJogoService, CondicaoJogoService>();

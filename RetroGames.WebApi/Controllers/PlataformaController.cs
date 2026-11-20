@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
+using RetroGames.WebApi.Configuration;
 using RetroGames.WebApi.Mappers;
 
 namespace RetroGames.WebApi.Controllers;
@@ -12,6 +14,7 @@ namespace RetroGames.WebApi.Controllers;
 public class PlataformaController(IPlataformaService servico) : ControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<RetroGamesResponseApiModel<List<ListarPlataformaResponseApiModel>>>> Listar()
     {
         var plataformas = await servico.ListarAsync();
@@ -23,6 +26,7 @@ public class PlataformaController(IPlataformaService servico) : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<RetroGamesResponseApiModel<ListarPlataformaResponseApiModel>>> ListarPorId(int id)
     {
         var plataforma = await servico.BuscarPorIdAsync(id);
@@ -34,6 +38,7 @@ public class PlataformaController(IPlataformaService servico) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = Politicas.Administrador)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<RetroGamesResponseApiModel<ListarPlataformaResponseApiModel>>> Inserir(
         [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] InserirPlataformaRequestApiModel? request)
@@ -49,6 +54,7 @@ public class PlataformaController(IPlataformaService servico) : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = Politicas.Administrador)]
     public async Task<ActionResult<RetroGamesResponseApiModel>> Alterar(
         int id,
         [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] AlterarPlataformaRequestApiModel? request)
@@ -58,6 +64,7 @@ public class PlataformaController(IPlataformaService servico) : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Policy = Politicas.Administrador)]
     public async Task<ActionResult<RetroGamesResponseApiModel>> Excluir(int id)
     {
         await servico.ExcluirAsync(id);

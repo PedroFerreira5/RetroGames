@@ -7,10 +7,12 @@ namespace RetroGames.Services;
 public class JogoService : IJogoService
 {
     private readonly IRepositorySet _repositorio;
+    private readonly IUsuarioAtualService _usuarioAtual;
 
-    public JogoService(IRepositorySet repositorio)
+    public JogoService(IRepositorySet repositorio, IUsuarioAtualService usuarioAtual)
     {
         _repositorio = repositorio;
+        _usuarioAtual = usuarioAtual;
     }
 
     public async Task<(List<JogoDetalheServiceModel> Jogos, int Total)> ListarAsync(
@@ -33,7 +35,8 @@ public class JogoService : IJogoService
         }
 
         var (jogos, total) = await _repositorio.Jogo.ListarAsync(
-            busca, idPlataforma, idsJogos, incluirInativos, pagina, tamanhoPagina);
+            busca, idPlataforma, idsJogos, incluirInativos && _usuarioAtual.EhAdministrador,
+            pagina, tamanhoPagina);
 
         return (await MontarDetalhesAsync(jogos), total);
     }
@@ -41,6 +44,11 @@ public class JogoService : IJogoService
     public async Task<JogoDetalheServiceModel> BuscarPorIdAsync(int id)
     {
         var jogo = await BuscarJogoAsync(id);
+        if (!jogo.Ativo && !_usuarioAtual.EhAdministrador)
+        {
+            throw new BusinessRuleException(BusinessErrors.JogoNaoEncontrado);
+        }
+
         var detalhes = await MontarDetalhesAsync([jogo]);
         return detalhes[0];
     }

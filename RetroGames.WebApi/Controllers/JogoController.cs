@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
+using RetroGames.WebApi.Configuration;
 using RetroGames.WebApi.Mappers;
 
 namespace RetroGames.WebApi.Controllers;
@@ -12,13 +14,14 @@ namespace RetroGames.WebApi.Controllers;
 public class JogoController(IJogoService servico) : ControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<RetroGamesResponseApiModel<PaginaResponseApiModel<ListarJogoResponseApiModel>>>>
         Listar([FromQuery] ListarJogoRequestApiModel request)
     {
         var filtro = request.ParaFiltro();
         var (jogos, total) = await servico.ListarAsync(
             filtro.Busca, filtro.IdPlataforma, filtro.IdGenero,
-            pagina: filtro.Pagina, tamanhoPagina: filtro.TamanhoPagina);
+            filtro.IncluirInativos, filtro.Pagina, filtro.TamanhoPagina);
 
         return Ok(new RetroGamesResponseApiModel<PaginaResponseApiModel<ListarJogoResponseApiModel>>
         {
@@ -28,6 +31,7 @@ public class JogoController(IJogoService servico) : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     [ProducesResponseType<RetroGamesResponseApiModel>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RetroGamesResponseApiModel<ListarPorIdJogoResponseApiModel>>>
         ListarPorId(int id)
@@ -41,6 +45,7 @@ public class JogoController(IJogoService servico) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = Politicas.Administrador)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<RetroGamesResponseApiModel<ListarPorIdJogoResponseApiModel>>> Inserir(
         [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] InserirJogoRequestApiModel? request)
@@ -58,6 +63,7 @@ public class JogoController(IJogoService servico) : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = Politicas.Administrador)]
     public async Task<ActionResult<RetroGamesResponseApiModel>> Alterar(
         int id,
         [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] AlterarJogoRequestApiModel? request)
@@ -68,6 +74,7 @@ public class JogoController(IJogoService servico) : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Policy = Politicas.Administrador)]
     public async Task<ActionResult<RetroGamesResponseApiModel>> Excluir(int id)
     {
         await servico.DesativarAsync(id);

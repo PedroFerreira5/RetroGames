@@ -20,6 +20,7 @@ if (string.IsNullOrWhiteSpace(stringConexao))
 builder.Services.AddRepositorios(stringConexao);
 builder.Services.AddServicosDeNegocio();
 builder.Services.AddAutenticacao(builder.Environment);
+builder.Services.AddPoliticasDeAcesso();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services
     .AddControllersWithViews(opcoes =>
@@ -74,7 +75,7 @@ app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
     app.UseSwaggerUI(opcoes =>
     {
         opcoes.SwaggerEndpoint("/openapi/v1.json", "RetroGames API v1");

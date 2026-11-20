@@ -6,11 +6,11 @@ namespace RetroGames.WebApi.Mappers;
 
 public static class JogoMapper
 {
-    public static (string? Busca, int? IdPlataforma, int? IdGenero, int Pagina, int TamanhoPagina)
+    public static (string? Busca, int? IdPlataforma, int? IdGenero, bool IncluirInativos, int Pagina, int TamanhoPagina)
         ParaFiltro(this ListarJogoRequestApiModel request)
     {
         return (request.Busca, request.IdPlataforma, request.IdGenero,
-            request.Pagina, request.TamanhoPagina);
+            request.IncluirInativos, request.Pagina, request.TamanhoPagina);
     }
 
     public static ListarJogoResponseApiModel ParaResponse(this JogoDetalheServiceModel detalhe)

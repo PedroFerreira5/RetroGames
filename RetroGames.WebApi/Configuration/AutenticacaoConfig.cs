@@ -30,7 +30,6 @@ public static class AutenticacaoConfig
                     contexto.Response, StatusCodes.Status403Forbidden, ResponseCodes.ACESSO_NEGADO);
             });
 
-        servicos.AddAuthorization();
         servicos.AddAntiforgery(opcoes =>
         {
             opcoes.HeaderName = HeaderCsrf;
