@@ -16,7 +16,7 @@ public interface IJogoService
 
     Task<Jogo> InserirAsync(Jogo jogo, IReadOnlyCollection<int> idsGeneros);
 
-    Task AlterarAsync(Jogo jogo, IReadOnlyCollection<int> idsGeneros);
+    Task AlterarAsync(Jogo jogo, IReadOnlyCollection<int> idsGeneros, bool? ativo = null);
 
     Task DesativarAsync(int id);
 }

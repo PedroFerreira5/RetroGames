@@ -64,12 +64,12 @@ public class JogoService : IJogoService
         return jogo;
     }
 
-    public async Task AlterarAsync(Jogo jogo, IReadOnlyCollection<int> idsGeneros)
+    public async Task AlterarAsync(Jogo jogo, IReadOnlyCollection<int> idsGeneros, bool? ativo = null)
     {
         var jogoAtual = await BuscarJogoAsync(jogo.Id);
         var generos = await ValidarReferenciasAsync(jogo, idsGeneros);
         jogo.Nome = jogo.Nome.Trim();
-        jogo.Ativo = jogoAtual.Ativo;
+        jogo.Ativo = ativo ?? jogoAtual.Ativo;
 
         using (var transacao = CriarTransacao())
         {
