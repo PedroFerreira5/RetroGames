@@ -78,23 +78,18 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi().AllowAnonymous();
     app.UseSwaggerUI(opcoes =>
     {
+        opcoes.CacheLifetime = TimeSpan.Zero;
         opcoes.SwaggerEndpoint("/openapi/v1.json", "RetroGames API v1");
-        opcoes.UseRequestInterceptor("""
-            (request) => {
-                const url = new URL(request.url, window.location.href);
-                if (url.origin !== window.location.origin ||
-                    !["POST", "PUT", "DELETE"].includes(request.method?.toUpperCase())) {
-                    return request;
-                }
-
-                const token = document.cookie.split("; ")
-                    .find(cookie => cookie.startsWith("XSRF-TOKEN="));
-                if (token) {
-                    request.headers["X-CSRF-TOKEN"] = decodeURIComponent(token.slice("XSRF-TOKEN=".length));
-                }
-                return request;
-            }
-            """);
+        // O Swagger insere esta função em JSON dentro de uma string JavaScript.
+        // Preserve a função em uma linha e use aspas simples nos valores.
+        opcoes.UseRequestInterceptor(string.Concat(
+            "function (request) { ",
+            "const url = new URL(request.url, window.location.href); ",
+            "if (url.origin !== window.location.origin || ",
+            "!['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method?.toUpperCase())) return request; ",
+            "const token = document.cookie.split('; ').find(cookie => cookie.startsWith('XSRF-TOKEN=')); ",
+            "if (token) request.headers['X-CSRF-TOKEN'] = decodeURIComponent(token.slice('XSRF-TOKEN='.length)); ",
+            "return request; }"));
     });
 }
 
