@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi;
 using RetroGames.Services;
 using RetroGames.WebApi.ActionFilters;
@@ -18,9 +19,16 @@ if (string.IsNullOrWhiteSpace(stringConexao))
 
 builder.Services.AddRepositorios(stringConexao);
 builder.Services.AddServicosDeNegocio();
+builder.Services.AddAutenticacao(builder.Environment);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services
-    .AddControllers(opcoes => opcoes.Filters.Add<FluentValidationFilter>())
+    .AddControllersWithViews(opcoes =>
+    {
+        opcoes.Filters.Add<AutoValidateAntiforgeryTokenAttribute>();
+        // Mantém o envelope antes da conversão de erros do MVC.
+        opcoes.Filters.Add<AntiforgeryResponseFilter>(-2100);
+        opcoes.Filters.Add<FluentValidationFilter>();
+    })
     .ConfigureApiBehaviorOptions(opcoes =>
         opcoes.InvalidModelStateResponseFactory = FluentValidationFilter.ResponderModelStateInvalido);
 builder.Services.AddOpenApi(opcoes =>
@@ -68,8 +76,28 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwaggerUI(opcoes =>
-        opcoes.SwaggerEndpoint("/openapi/v1.json", "RetroGames API v1"));
+    {
+        opcoes.SwaggerEndpoint("/openapi/v1.json", "RetroGames API v1");
+        opcoes.UseRequestInterceptor("""
+            (request) => {
+                const url = new URL(request.url, window.location.href);
+                if (url.origin !== window.location.origin ||
+                    !["POST", "PUT", "DELETE"].includes(request.method?.toUpperCase())) {
+                    return request;
+                }
+
+                const token = document.cookie.split("; ")
+                    .find(cookie => cookie.startsWith("XSRF-TOKEN="));
+                if (token) {
+                    request.headers["X-CSRF-TOKEN"] = decodeURIComponent(token.slice("XSRF-TOKEN=".length));
+                }
+                return request;
+            }
+            """);
+    });
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.Run();
