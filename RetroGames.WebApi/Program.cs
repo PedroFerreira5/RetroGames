@@ -1,4 +1,6 @@
+using FluentValidation;
 using Microsoft.OpenApi;
+using RetroGames.WebApi.ActionFilters;
 using RetroGames.WebApi.Configuration;
 using RetroGames.WebApi.Middlewares;
 
@@ -15,7 +17,11 @@ if (string.IsNullOrWhiteSpace(stringConexao))
 
 builder.Services.AddRepositorios(stringConexao);
 builder.Services.AddServicosDeNegocio();
-builder.Services.AddControllers();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services
+    .AddControllers(opcoes => opcoes.Filters.Add<FluentValidationFilter>())
+    .ConfigureApiBehaviorOptions(opcoes =>
+        opcoes.InvalidModelStateResponseFactory = FluentValidationFilter.ResponderModelStateInvalido);
 builder.Services.AddOpenApi(opcoes =>
 {
     opcoes.AddOperationTransformer((operacao, contexto, _) =>
